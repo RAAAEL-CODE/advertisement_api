@@ -5,16 +5,12 @@ from bson.objectid import ObjectId
 from utils import replace_mongo_id
 from typing import Annotated
 import cloudinary, cloudinary.uploader
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # Configure cloudinary
 cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME"),
-    api_key=os.getenv("API_KEY"),
-    api_secret=os.getenv("API_SECRET"),
+    cloud_name="dyf9h2cb0",
+    api_key="526419166373937",
+    api_secret="5MXfLxNArpPFrLy1M5RFxdzkypg",
 )
 
 
@@ -24,23 +20,24 @@ class AdvertModel(BaseModel):
     price: float
     category: str
 
+
 app = FastAPI()
 
 
 # Home page
-@app.get("/", tags=["Home"])
+@app.get("/")
 def read_root():
     return {"message": "Welcome to RAAAEL Advertisement API"}
 
 
 # Post Advert (POST): For vendors to create a new advert.
-@app.post("/adverts", tags=["Publish An Advert"])
+@app.post("/adverts")
 def create_advert(
     title: Annotated[str, Form()],
     description: Annotated[str, Form()],
     price: Annotated[float, Form()],
     category: Annotated[str, Form()],
-    flyer: Annotated[UploadFile, File()],
+    flyer: Annotated[UploadFile, File()] = None,
 ):
     upload_result = cloudinary.uploader.upload(flyer.file)
 
@@ -56,7 +53,7 @@ def create_advert(
     return {"Message": "Advert added successfully."}
 
 
-@app.get("/adverts", tags=["Retrieve All Adverts"])
+@app.get("/adverts")
 def get_all_adverts(title="", description="", limit=7, skip=0):
     # Get all adverts from database
     adverts = adverts_collection.find(
@@ -74,7 +71,7 @@ def get_all_adverts(title="", description="", limit=7, skip=0):
 
 
 # Get Advert Details (GET): For vendors to view a specific advert’s details.
-@app.get("/adverts/{advert_id}", tags=["Retrieve Advert"])
+@app.get("/adverts/{advert_id}")
 def get_adverts_by_id(advert_id):
     # Check if advert id is valid
     if not ObjectId.is_valid(advert_id):
@@ -88,7 +85,7 @@ def get_adverts_by_id(advert_id):
 
 
 # Update Advert (PUT): For vendors to edit an advert
-@app.put("/adverts/{advert_id}", tags=["Replace Advert"])
+@app.put("/adverts/{advert_id}")
 def replace_advert(
     advert_id,
     title: Annotated[str, Form()],
@@ -118,7 +115,7 @@ def replace_advert(
 
 
 # Delete Advert (DELETE):  For vendors to remove an advert.
-@app.delete("/adverts/{advert_id}", tags=["Delete Advert"])
+@app.delete("/adverts/{advert_id}")
 def delete_advert_by_id(advert_id):
     if not ObjectId.is_valid(advert_id):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid Advert ID")
