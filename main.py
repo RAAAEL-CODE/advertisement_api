@@ -23,6 +23,7 @@ class AdvertModel(BaseModel):
     description: str
     price: float
     category: str
+    # currency: GHc
 
 
 app = FastAPI()
@@ -35,7 +36,7 @@ def read_root():
 
 
 # Post Advert (POST): For vendors to create a new advert.
-@app.post("/adverts", tags=["Publish An Advert"])
+@app.post("/adverts")
 def create_advert(
     title: Annotated[str, Form()],
     description: Annotated[str, Form()],
@@ -57,8 +58,8 @@ def create_advert(
     return {"Message": "Advert added successfully."}
 
 
-@app.get("/adverts", tags=["Retrieve All Adverts"])
-def get_all_adverts(title="", description="", limit=7, skip=0):
+@app.get("/adverts")
+def get_all_adverts(title="", description="", limit=10, skip=0):
     # Get all adverts from database
     adverts = adverts_collection.find(
         filter={
@@ -75,7 +76,7 @@ def get_all_adverts(title="", description="", limit=7, skip=0):
 
 
 # Get Advert Details (GET): For vendors to view a specific advert’s details.
-@app.get("/adverts/{advert_id}", tags=["Retrieve Advert"])
+@app.get("/adverts/{advert_id}")
 def get_adverts_by_id(advert_id):
     # Check if advert id is valid
     if not ObjectId.is_valid(advert_id):
@@ -89,7 +90,7 @@ def get_adverts_by_id(advert_id):
 
 
 # Update Advert (PUT): For vendors to edit an advert
-@app.put("/adverts/{advert_id}", tags=["Replace Advert"])
+@app.put("/adverts/{advert_id}")
 def replace_advert(
     advert_id,
     title: Annotated[str, Form()],
@@ -119,7 +120,7 @@ def replace_advert(
 
 
 # Delete Advert (DELETE):  For vendors to remove an advert.
-@app.delete("/adverts/{advert_id}", tags=["Delete Advert"])
+@app.delete("/adverts/{advert_id}")
 def delete_advert_by_id(advert_id):
     if not ObjectId.is_valid(advert_id):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid Advert ID")
