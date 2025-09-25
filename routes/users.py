@@ -84,4 +84,4 @@ def login_user(email: Annotated[EmailStr, Form()], password: Annotated[str, Form
         "HS256",
     )
     # Return response
-    return {"message": "Welcome to RAAAEL Ads", "access token": encoded_jwt}
+    return {"message": "Welcome to RAAAEL Ads", "access_token": encoded_jwt}
