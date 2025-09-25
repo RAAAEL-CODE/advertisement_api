@@ -77,7 +77,7 @@ def get_similar_adverts(advert_id, limit=10, skip=0):
 # Post Advert (POST): For vendors to create a new advert.
 @adverts_router.post(
     "/adverts",
-    dependencies=[Depends(has_roles(["vendor"]))],
+    dependencies=[Depends(has_roles(["Vendor"]))],
     tags=["Vendor"],
 )
 def create_advert(
@@ -128,7 +128,7 @@ def create_advert(
 @adverts_router.put(
     "/adverts/{advert_id}",
     tags=["Vendor"],
-    dependencies=[Depends(has_roles(["vendor"]))],
+    dependencies=[Depends(has_roles(["Vendor"]))],
 )
 def replace_advert(
     advert_id,
@@ -178,7 +178,7 @@ def replace_advert(
 @adverts_router.delete(
     "/adverts/{advert_id}",
     tags=["Vendor"],
-    dependencies=[Depends(is_authenticated), Depends(has_roles(["vendor"]))],
+    dependencies=[Depends(is_authenticated), Depends(has_roles(["Vendor"]))],
 )
 def delete_advert_by_id(advert_id, user_id: Annotated[str, Depends(is_authenticated)]):
     if not ObjectId.is_valid(advert_id):
@@ -195,7 +195,7 @@ def delete_advert_by_id(advert_id, user_id: Annotated[str, Depends(is_authentica
 
 
 @adverts_router.get(
-    "/adverts/user/me", tags=["Vendor"], dependencies=[Depends(has_roles(["vendor"]))]
+    "/adverts/user/me", tags=["Vendor"], dependencies=[Depends(has_roles(["Vendor"]))]
 )
 def get_my_adverts(user_id: Annotated[str, Depends(is_authenticated)]):
     adverts = adverts_collection.find(filter={"owner": user_id}).to_list()
