@@ -8,6 +8,14 @@ import jwt
 import os
 from datetime import timezone, datetime, timedelta
 from models import UserRole
+import re
+
+
+# Helper function to validate password strength
+def validate_password_strength(password: str) -> bool:
+    pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+    return re.match(pattern, password) is not None
+
 
 # Create users router
 users_router = APIRouter()
@@ -25,6 +33,13 @@ def register_user(
     user_count = users_collection.count_documents(filter={"email": email})
     if user_count > 0:
         raise HTTPException(status.HTTP_409_CONFLICT, "User already exists!")
+
+    if not validate_password_strength(password):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        )
+
     # Hash user password
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     users_collection.insert_one(
