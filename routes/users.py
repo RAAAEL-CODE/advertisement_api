@@ -27,9 +27,15 @@ def register_user(
     username: Annotated[str, Form()],
     email: Annotated[EmailStr, Form()],
     password: Annotated[str, Form(min_length=8)],
+    confirm_password: Annotated[str, Form(min_length=8)],
     role: Annotated[UserRole, Form()] = UserRole.CONSUMER,  # default role is consumer
     location: Annotated[Optional[str], Form()] = None,
 ):
+    # Checking for the confirm password match
+    if password != confirm_password:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Password Mismatch! Confirm Password Properly."
+        )
     # Ensure user does not exist (using this instead of find one, which brings the data from the dtbs)
     user_count = users_collection.count_documents(filter={"email": email})
     if user_count > 0:
