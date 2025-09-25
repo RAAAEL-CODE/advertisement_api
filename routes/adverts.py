@@ -36,7 +36,7 @@ def get_all_adverts(
 
 
 # Get Advert Details (GET): For vendors to view a specific advert’s details.
-@adverts_router.get("/adverts/", tags=["Adverts"])
+@adverts_router.get("/adverts/{advert_id}", tags=["Adverts"])
 def get_adverts_by_id(advert_id):
     # Check if advert id is valid
     if not ObjectId.is_valid(advert_id):
@@ -50,7 +50,7 @@ def get_adverts_by_id(advert_id):
 
 
 # Get similar adverts
-@adverts_router.get("/adverts/{advert_id}", tags=["Adverts"])
+@adverts_router.get("/adverts/{advert_id}/similar", tags=["Adverts"])
 def get_similar_adverts(advert_id, limit=10, skip=0):
     # Check if advert id is valid
     if not ObjectId.is_valid(advert_id):
@@ -60,11 +60,12 @@ def get_similar_adverts(advert_id, limit=10, skip=0):
     # Get similar events from database
     adverts = adverts_collection.find(
         filter={
+            "_id": {"$ne": ObjectId(advert_id)},
             "$or": [
                 {"title": {"$regex": advert["title"], "$options": "i"}},
                 {"description": {"$regex": advert["description"], "$options": "i"}},
                 {"category": {"$regex": advert["category"], "$options": "i"}},
-            ]
+            ],
         },
         limit=int(limit),
         skip=int(skip),

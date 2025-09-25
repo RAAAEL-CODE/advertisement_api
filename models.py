@@ -3,5 +3,5 @@ from enum import Enum
 
 class UserRole(str, Enum):
     # ADMIN = "admin"
-    HOST = "vendor"
-    GUEST = "customer"
+    VENDOR = "Vendor"
+    CONSUMER = "Consumer"

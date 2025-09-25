@@ -1,6 +1,6 @@
 from enum import Enum
 from fastapi import APIRouter, Form, HTTPException, status
-from typing import Annotated
+from typing import Annotated, Optional
 from pydantic import EmailStr
 from db import users_collection
 import bcrypt
@@ -27,12 +27,17 @@ def register_user(
     username: Annotated[str, Form()],
     email: Annotated[EmailStr, Form()],
     password: Annotated[str, Form(min_length=8)],
-    role: Annotated[UserRole, Form()] = UserRole.GUEST,  # default role is guest
+    role: Annotated[UserRole, Form()] = UserRole.CONSUMER,  # default role is consumer
+    location: Annotated[Optional[str], Form()] = None,
 ):
     # Ensure user does not exist (using this instead of find one, which brings the data from the dtbs)
     user_count = users_collection.count_documents(filter={"email": email})
     if user_count > 0:
         raise HTTPException(status.HTTP_409_CONFLICT, "User already exists!")
+
+    # for role = vendor ensure location is provide
+    if role == UserRole.VENDOR and not location:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Vendor Must Provide Location")
 
     if not validate_password_strength(password):
         raise HTTPException(
@@ -42,15 +47,18 @@ def register_user(
 
     # Hash user password
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-    users_collection.insert_one(
-        {
-            "username": username,
-            "email": email,
-            "password": hashed_password.decode("utf-8"),
-            "role": role,
-        }
-    )
     # Save user into database
+    user_details = {
+        "username": username,
+        "email": email,
+        "password": hashed_password.decode("utf-8"),
+        "role": role,
+    }
+    # Adding location to user_details if provided
+    if role == UserRole.VENDOR and location:
+        user_details["location"] = location
+    # Save user into database
+    users_collection.insert_one(user_details)
     # Return response
     return {"message": "User registered successfully"}
 
