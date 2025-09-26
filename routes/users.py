@@ -60,7 +60,7 @@ def register_user(
     # Save user into database
     users_collection.insert_one(user_details)
     # Return response
-    return {"message": "User registered successfully"}
+    return {"Message": "User registered successfully"}
 
 
 @users_router.post("/users/login")
@@ -84,4 +84,8 @@ def login_user(email: Annotated[EmailStr, Form()], password: Annotated[str, Form
         "HS256",
     )
     # Return response
-    return {"message": "Welcome to RAAAEL Ads", "access_token": encoded_jwt}
+    return {
+        "Message": "Welcome to RAAAEL Ads",
+        "Access_token": encoded_jwt,
+        "Role": user_in_db["role"],
+    }
